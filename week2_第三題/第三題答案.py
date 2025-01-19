@@ -1,32 +1,34 @@
 def func(*data):
     name_map = {}  
-    mid_names = []  
+    mid_name_count = {} 
+    unique_mid_name_names = [] 
 
+    
     for all_name in data:
-        mid_name = all_name[1:]  
+        mid_name = ''
+
+        
+        if len(all_name) == 2 or len(all_name) == 3:
+            mid_name = all_name[1]  
+        elif len(all_name) == 4 or len(all_name) == 5:
+            mid_name = all_name[2]
+
         name_map[all_name] = mid_name  
-        mid_names.append(mid_name)  
 
-    result = []  
+      
+        if mid_name in mid_name_count:
+            mid_name_count[mid_name] += 1
+        else:
+            mid_name_count[mid_name] = 1
 
-    for all_name, mid_name in name_map.items():
-        is_unique = True  
+    
+    for all_name in data:
+        mid_name = name_map[all_name]
+        if mid_name_count[mid_name] == 1:
+            unique_mid_name_names.append(all_name)  
 
-
-        for char in mid_name:
-            for other_mid_name in mid_names:
-                if other_mid_name != mid_name and char in other_mid_name:
-                    is_unique = False  
-                    break
-            if not is_unique:
-                break  
-
-        if is_unique:
-            result.append(all_name)
-
-    if not result:
-        print("沒有")
+ 
+    if unique_mid_name_names:
+        print(unique_mid_name_names)  
     else:
-        print(result)
-
-    return result
+        print("沒有")  
