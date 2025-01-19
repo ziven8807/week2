@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>第三題</title>
+  </head>
+  <body>
+    <h1>第三題：檢查姓名中間名是否有重複字符</h1>
+
+    <!-- 用戶輸入姓名 -->
+    <label for="namesInput">請輸入姓名 (以逗號分隔): </label>
+    <input
+      type="text"
+      id="namesInput"
+      placeholder="例如: 彭大牆,陳王明雅,吳明"
+    />
+    <button onclick="processNames()">提交</button>
+
+    <!-- 顯示結果 -->
+    <div id="result"></div>
+
+    <script>
+      function func(...data) {
+        let nameMap = new Map(); // 用來存儲每個人的姓名與中間名的對應關係
+        let midNames = []; // 用來存儲所有人的中間名
+
+        // 遍歷每個姓名
+        data.forEach((allName) => {
+          let midName = allName.slice(1); // 去掉姓氏，剩下中間名
+          nameMap.set(allName, midName); // 將原名字作為key(allName)，中間名作為value(midName)存入 Map
+          midNames.push(midName); // 存儲所有中間名
+        });
+
+        // 過濾掉有重複字符的姓名
+        let result = []; // 用來存符合條件的姓名
+
+        nameMap.forEach((midName, allName) => {
+          let isUnique = true; // 先假設每個人的中間名都沒有重複字符
+
+          // 檢查該中間名的每個字符是否與其他中間名有重複字符
+          for (let char of midName) {
+            for (let otherMidName of midNames) {
+              if (otherMidName !== midName && otherMidName.includes(char)) {
+                isUnique = false; // 發現重複字符，標記為不符合條件
+                break;
+              }
+            }
+            if (!isUnique) break; // 如果發現重複字符，直接跳出內層循環
+          }
+
+          // 若isUnique仍然是true，則代表該名符合條件
+          if (isUnique) {
+            result.push(allName);
+          }
+        });
+
+        // 返回結果
+        return result;
+      }
+
+      function processNames() {
+        // 獲取使用者輸入的姓名
+        const input = document.getElementById("namesInput").value;
+        const namesArray = input.split(",").map((name) => name.trim()); // 分割並去除空白
+
+        // 呼叫 func 函數處理姓名
+        const result = func(...namesArray);
+
+        // 顯示結果
+        const resultDiv = document.getElementById("result");
+        if (result.length === 0) {
+          resultDiv.textContent = "沒有";
+        } else {
+          resultDiv.textContent = result.join(", ");
+        }
+      }
+    </script>
+  </body>
+</html>

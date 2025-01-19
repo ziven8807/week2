@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>顧問預定系統</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+      }
+      table,
+      th,
+      td {
+        border: 1px solid #ccc;
+      }
+      th,
+      td {
+        padding: 10px;
+        text-align: center;
+      }
+      button {
+        padding: 10px 15px;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #45a049;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>第三題：顧問預定系統</h1>
+
+    <table>
+      <thead>
+        <tr>
+          <th>顧問姓名</th>
+          <th>評分</th>
+          <th>價格</th>
+        </tr>
+      </thead>
+      <tbody id="consultantList">
+        <!-- 顧問列表將會在這裡顯示 -->
+      </tbody>
+    </table>
+
+    <h2>預定顧問</h2>
+    <label for="hour">預定時間 (小時): </label>
+    <input type="number" id="hour" min="0" max="23" placeholder="例如: 15" />
+    <br /><br />
+    <label for="duration">預定時長 (小時): </label>
+    <input type="number" id="duration" min="1" max="12" placeholder="例如: 2" />
+    <br /><br />
+    <label for="criteria">排序條件: </label>
+    <select id="criteria">
+      <option value="price">按價格排序</option>
+      <option value="rate">按評分排序</option>
+    </select>
+    <br /><br />
+    <button onclick="handleBooking()">預定顧問</button>
+
+    <h3>預定結果:</h3>
+    <p id="result">請進行預定</p>
+
+    <script>
+      // 顧問資料
+      const consultants = [
+        { name: "John", rate: 4.5, price: 1000 },
+        { name: "Bob", rate: 3, price: 1200 },
+        { name: "Jenny", rate: 3.8, price: 800 },
+      ];
+
+      // 儲存顧問的預定時間
+      let bookings = {};
+
+      // 顯示顧問列表
+      function displayConsultants() {
+        const consultantList = document.getElementById("consultantList");
+        consultantList.innerHTML = ""; // 清空顧問表格
+        consultants.forEach((consultant) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+          <td>${consultant.name}</td>
+          <td>${consultant.rate}</td>
+          <td>${consultant.price}</td>
+        `;
+          consultantList.appendChild(row);
+        });
+      }
+
+      // 預定顧問的函數
+      function book(consultants, hour, duration, criteria) {
+        // 初始化顧問的預定時間
+        for (let consultant of consultants) {
+          if (!bookings[consultant.name]) {
+            bookings[consultant.name] = [];
+          }
+        }
+
+        // 根據選擇標準 (criteria) 進行排序
+        if (criteria === "price") {
+          consultants.sort((a, b) => a.price - b.price); // 按價格升序排序
+        } else if (criteria === "rate") {
+          consultants.sort((a, b) => b.rate - a.rate); // 按評價降序排序
+        }
+
+        // 遍歷顧問，選擇符合條件的顧問
+        for (let consultant of consultants) {
+          let isAvailable = true;
+
+          // 檢查顧問是否有時間重疊
+          for (let [existingStart, existingEnd] of bookings[consultant.name]) {
+            if (hour < existingEnd && hour + duration > existingStart) {
+              // 有重疊時間，顧問不可用
+              isAvailable = false;
+              break;
+            }
+          }
+
+          // 如果顧問有空，則進行預定並直接印出結果
+          if (isAvailable) {
+            bookings[consultant.name].push([hour, hour + duration]); // 更新預定時間
+            return consultant.name;
+          }
+        }
+
+        // 如果沒有找到可用的顧問，直接印出結果
+        return "No Service";
+      }
+
+      // 處理預定
+      function handleBooking() {
+        const hour = parseInt(document.getElementById("hour").value);
+        const duration = parseInt(document.getElementById("duration").value);
+        const criteria = document.getElementById("criteria").value;
+
+        // 檢查輸入是否有效
+        if (isNaN(hour) || isNaN(duration)) {
+          document.getElementById("result").textContent =
+            "請輸入有效的預定時間和時長";
+          return;
+        }
+
+        // 執行預定並顯示結果
+        const result = book(consultants, hour, duration, criteria);
+        document.getElementById("result").textContent =
+          result === "No Service" ? "No Service" : `${result} 已成功預定`;
+      }
+
+      // 頁面載入時顯示顧問列表
+      displayConsultants();
+    </script>
+  </body>
+</html>

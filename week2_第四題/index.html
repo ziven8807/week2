@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Number Calculation</title>
+  </head>
+  <body>
+    <h1>第四題：輸入一個數字，根據規則計算結果</h1>
+
+    <label for="indexInput">輸入數字:</label>
+    <input type="number" id="indexInput" placeholder="請輸入數字" />
+    <button onclick="calculate()">計算</button>
+
+    <p>結果: <span id="result"></span></p>
+
+    <script>
+      function getNumber(index) {
+        let dp = [0]; // index[0] = 0, 初始值為 0
+
+        // 從 index[1] 開始計算直到目標 index
+        for (let i = 1; i <= index; i++) {
+          if (i % 3 === 0) {
+            // 如果是 3 的倍數，進行減 1 操作
+            dp[i] = dp[i - 1] - 1;
+          } else {
+            // 否則，每次加 4
+            dp[i] = dp[i - 1] + 4;
+          }
+        }
+
+        return dp[index]; // 返回對應的 index 的值
+      }
+
+      function calculate() {
+        // 取得使用者輸入的數字
+        const index = parseInt(document.getElementById("indexInput").value);
+
+        // 驗證輸入是否為有效的數字
+        if (isNaN(index) || index < 0) {
+          alert("請輸入有效的正整數！");
+          return;
+        }
+
+        // 計算並顯示結果
+        const result = getNumber(index);
+        document.getElementById("result").textContent = result;
+      }
+    </script>
+  </body>
+</html>

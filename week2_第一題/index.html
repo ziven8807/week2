@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>最接近的車站人物</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        padding: 0;
+        background-color: #f4f4f9;
+      }
+      h1 {
+        color: #333;
+      }
+      .container {
+        margin-top: 20px;
+      }
+      input {
+        padding: 10px;
+        font-size: 16px;
+        margin-right: 10px;
+      }
+      button {
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+      }
+      #result {
+        margin-top: 20px;
+        font-size: 18px;
+        color: #333;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>第一題：找到最接近的人</h1>
+    <div class="container">
+      <label for="currentStation">輸入你當前所在的車站:</label>
+      <input type="text" id="currentStation" placeholder="例如: Ximen" />
+      <button onclick="findClosestPerson()">確認</button>
+    </div>
+    <div id="result"></div>
+
+    <script>
+      class Graph {
+        constructor() {
+          this.adjacencyList = new Map();
+        }
+
+        addNode(node) {
+          if (!this.adjacencyList.has(node)) {
+            this.adjacencyList.set(node, new Set());
+          }
+        }
+
+        addEdge(node1, node2) {
+          if (!this.adjacencyList.has(node1)) this.addNode(node1);
+          if (!this.adjacencyList.has(node2)) this.addNode(node2);
+
+          this.adjacencyList.get(node1).add(node2);
+          this.adjacencyList.get(node2).add(node1);
+        }
+
+        bfs(startStation) {
+          const queue = [startStation];
+          const distances = new Map();
+          const previous = new Map();
+
+          distances.set(startStation, 0);
+          previous.set(startStation, null);
+
+          while (queue.length > 0) {
+            const current = queue.shift();
+            const neighbors = this.adjacencyList.get(current);
+            neighbors.forEach((neighbor) => {
+              if (!distances.has(neighbor)) {
+                distances.set(neighbor, distances.get(current) + 1);
+                previous.set(neighbor, current);
+                queue.push(neighbor);
+              }
+            });
+          }
+          return { distances, previous };
+        }
+
+        getPath(startStation, endStation) {
+          const { previous } = this.bfs(startStation);
+          const path = [];
+          let current = endStation;
+
+          while (current !== null) {
+            path.push(current);
+            current = previous.get(current);
+          }
+
+          return path.reverse();
+        }
+      }
+
+      const stations = [
+        "Songshan",
+        "Nanjing",
+        "Taipei Arena",
+        "Nanjing Fuxing",
+        "Songjiang Nanjing",
+        "Zhongshan",
+        "Beimen",
+        "Ximen",
+        "Xiaonanmen",
+        "Chiang Kai-Shek Memorial Hall",
+        "Guting",
+        "Taipower Building",
+        "Gongguan",
+        "Wanlong",
+        "Jingmei",
+        "Dapinglin",
+        "Qizhang",
+        "Xindian City Hall",
+        "Xindian",
+      ];
+
+      const extraStations = ["Xiaobitan"];
+
+      const messages = {
+        Leslie: "I'm at home near Xiaobitan station.",
+        Bob: "I'm at Ximen MRT station.",
+        Mary: "I have a drink near Jingmei MRT station.",
+        Copper: "I just saw a concert at Taipei Arena.",
+        Vivian: "I'm at Xindian station waiting for you.",
+      };
+
+      const mrtGraph = new Graph();
+
+      for (let i = 0; i < stations.length - 1; i++) {
+        mrtGraph.addEdge(stations[i], stations[i + 1]);
+      }
+
+      extraStations.forEach((station) => {
+        if (station === "Xiaobitan") {
+          mrtGraph.addEdge("Xiaobitan", "Qizhang");
+        }
+      });
+
+      const allStations = [...stations, ...extraStations];
+      const personStationMapping = {};
+
+      for (const person in messages) {
+        const message = messages[person];
+        for (const station of allStations) {
+          if (message.includes(station)) {
+            personStationMapping[person] = station;
+            break;
+          }
+        }
+      }
+
+      function findClosestPerson() {
+        const currentStation = document
+          .getElementById("currentStation")
+          .value.trim();
+        if (!currentStation || !allStations.includes(currentStation)) {
+          document.getElementById("result").innerText = "請輸入有效的車站名稱!";
+          return;
+        }
+
+        let closestPerson = null;
+        let shortestDistance = Infinity;
+
+        for (const person in messages) {
+          const personStation = personStationMapping[person];
+          const path = mrtGraph.getPath(currentStation, personStation);
+          const distance = path.length - 1;
+
+          if (distance < shortestDistance) {
+            shortestDistance = distance;
+            closestPerson = person;
+          }
+        }
+
+        if (closestPerson) {
+          document.getElementById(
+            "result"
+          ).innerText = `離你最近的人是: ${closestPerson}`;
+        } else {
+          document.getElementById("result").innerText = "找不到最近的人。";
+        }
+      }
+    </script>
+  </body>
+</html>
